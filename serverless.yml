@@ -1,34 +1,26 @@
 service: upload-to-s3-with-signedUrl
 
-frameworkVersion: "2"
+frameworkVersion: "3"
 
 # Specify your bucket name here
 custom:
-  bucketName: ### define the unique bucket name to be created - just lowercase
+  bucketName: imageinfoarchive
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
 
 provider:
   name: aws
   runtime: nodejs14.x
-  stage: dev # change the stage if you want
+  stage: test # change the stage if you want
   region: us-east-1 # change the region if you want
-  lambdaHashingVersion: 20201221
   stackName: ${self:custom.bucketName} 
   apiName: ${self:custom.bucketName} 
   endpointType: regional
   memorySize: 128
-  iam: #permisions for lambda access the s3 actions
-    role:
-      statements:
-        - Effect: Allow
-          Action:
-            - s3:GetObject
-            - s3:PutObject
-            - s3:PutObjectAcl
-          Resource:
-            - arn:aws:s3:::${self:custom.bucketName}/*
-          Sid: AllowPublic
+  vpc:
+    securityGroupIds: ${file(config/${opt:stage,self:provider.stage}/vpc.yml):security}
+    subnetIds: ${file(config/${opt:stage,self:provider.stage}/vpc.yml):subnets}
+  deploymentBucket: iia-short-lived
 	
 package: #exclude frontend folder and files on deploy
   patterns:
@@ -36,6 +28,7 @@ package: #exclude frontend folder and files on deploy
 
 functions: # lambda function
   upload:
+    role: arn:aws:iam::719579466865:role/test-iia-lambda
     handler: index.handler
     name: ${self:custom.bucketName}
     environment:

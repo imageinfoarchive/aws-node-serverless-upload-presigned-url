@@ -1,0 +1,9 @@
+{
+  "name": "upload-to-s3-with-signedUrl",
+  "version": "0.0.1",
+  "main": "handler.js",
+  "author": "FrizzyBlues",
+  "dependencies": {
+    "aws-sdk": "^2.1140.0"
+  }
+}
